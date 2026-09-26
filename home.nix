@@ -82,28 +82,6 @@
     # EDITOR = "emacs";
   };
 
-  sops = {
-    defaultSopsFile = ./secrets/ssh.yaml;
-
-    age.keyFile =
-      "${config.home.homeDirectory}/.config/sops/age/keys.txt";
-
-    secrets.ssh_private_key = {
-      path = "${config.home.homeDirectory}/.ssh/github_ed25519";
-      mode = "0600";
-    };
-  };
-
-  programs.ssh = {
-    enable = true;
-
-    matchBlocks."github.com" = {
-      user = "git";
-      identityFile = "~/.ssh/github_ed25519";
-      identitiesOnly = true;
-    };
-  };
-
   # Let Home Manager install and manage itself.
   programs.home-manager.enable = true;
 }
