@@ -1,6 +1,9 @@
-{ config, pkgs, ... }:
+{ config, pkgs, inputs, ... }:
 
 {
+  imports = [
+    inputs.sops-nix.homeManagerModules.sops
+  ];
   # Home Manager needs a bit of information about you and the paths it should
   # manage.
   home.username = "levig";
@@ -54,6 +57,9 @@
     #   org.gradle.console=verbose
     #   org.gradle.daemon.idletimeout=3600000
     # '';
+    ".ssh/github_ed25519.pub".text = ''
+      ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIO9vVtc/PQfGc0IzUucdpYMEVd8tL/wX7EApecPJgtKR github | levi.goossens107@gmail.com | nixos | 2026
+    '';
   };
 
   # Home Manager can also manage your environment variables through
@@ -74,6 +80,28 @@
   #
   home.sessionVariables = {
     # EDITOR = "emacs";
+  };
+
+  sops = {
+    defaultSopsFile = ./secrets/ssh.yaml;
+
+    age.keyFile =
+      "${config.home.homeDirectory}/.config/sops/age/keys.txt";
+
+    secrets.ssh_private_key = {
+      path = "${config.home.homeDirectory}/.ssh/github_ed25519";
+      mode = "0600";
+    };
+  };
+
+  programs.ssh = {
+    enable = true;
+
+    matchBlocks."github.com" = {
+      user = "git";
+      identityFile = "~/.ssh/github_ed25519";
+      identitiesOnly = true;
+    };
   };
 
   # Let Home Manager install and manage itself.
